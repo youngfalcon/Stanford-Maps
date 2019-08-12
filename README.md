@@ -1,5 +1,6 @@
 # Stanford-Maps
 A Stanford-specific version of  the initial design of Google Maps.
+CSS and JavaScript is embedded into the HTML file.
 
 The user can move around the map either by dragging by mouse or using the arrow buttons.
 
