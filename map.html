@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Stanford Maps</title>
+<style>
+#frame {
+	margin: 5px;
+	padding: 0px;
+	overflow: hidden;
+	border: 10px solid grey;
+}
+
+#map {
+	margin: 0px;
+	padding: 0px;
+}
+
+#buttons {
+	display: flex;
+	flex-direction: column;
+	height: 80%;
+	width: 200px;
+	margin: 0px;
+	margin-top: 20px;
+}
+
+#zoom {
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin-bottom: 20px;
+}
+#lr {
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.btn {
+	width: 50%;
+	display:flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+
+</style>
+</head>
+<body>
+<img id="a" src="map-xl.gif" alt="map" style="width:0px; height:0px; position: absolute; left: 0px; top: 0px;"/>
+<img id="b" src="map-l.gif" alt="map" style="width:0px; height:0px; position: absolute; left: 0px; top: 0px;"/>
+<img id="c" src="map-m.gif" alt="map" style="width:0px; height:0px; position: absolute; left: 0px; top: 0px;"/>
+<img id="d" src="map-s.gif" alt="map" style="width:0px; height:0px; position: absolute; left: 0px; top: 0px;"/>
+
+<div id="frame" style="position: absolute; left: 10%; top: 10%; width: calc(80% - 200px); height: 80%;">
+<img id="map" src="map-m.gif" alt="map" style="position: absolute; left: 0px; top: 0px;"/>
+</div>
+
+<div id ="buttons" style="position: absolute; right: 5%; top: 10%;">
+
+<div id ="zoom">
+<input type="button" id="in" value="+" style="width: 30px" />
+<input type="button" id="out" value="-" style="width: 30px" />
+</div>
+
+<div class="btn">
+<input type="button" id="up" value="&#8743;" style="width: 30px" />
+</div>
+<div  id="lr">
+<input type="button" id="left" value="<" style="width: 30px" />
+<input type="button" id="right" value=">" style="width: 30px" />
+</div>
+<div class="btn">
+<input type="button" id="down" value="&#8744;" style="width: 30px" />
+</div>
+</div>
+
+<script>
+"use strict";
+
+var maps = [{src: "map-xl.gif",width:4084.0,height:3164.0},{src:"map-l.gif",width:3063.0,height:2373.0},{src:"map-m.gif",width:2047.0,height:1589.0},{src:"map-s.gif",width:1283.0,height:997.0}];
+var ind = 2;
+
+function getBoxHeight() {
+	var box = document.getElementById("frame");
+	return parseInt(box.style.height);
+}
+
+function getBoxWidth() {
+	var box = document.getElementById("frame");
+	return parseInt(box.style.width);
+}
+
+function getBoxTop() {
+	var box = document.getElementById("frame");
+	return parseInt(box.style.top) + 15; //for the frame and margin
+}
+
+function getBoxLeft() {
+	var box = document.getElementById("frame");
+	return parseInt(box.style.left) + 15; //for the frame and margin
+}
+
+function inBox(x,y) {
+	return (x >= getBoxLeft() && x <= getBoxLeft() + getBoxWidth()
+				&& y >= getBoxTop() && y <= getBoxTop() + getBoxHeight());
+}
+
+document.getElementById('frame').style.width = (window.innerWidth-250)*4/5  + "px";
+document.getElementById('frame').style.height = (window.innerHeight)*4/5  + "px";
+document.getElementById('frame').style.left = (window.innerWidth)/10  + "px";
+document.getElementById('frame').style.top = (window.innerHeight)/10  + "px";
+	
+function handleResize() {
+	var dxx = parseInt(map.style.left);
+	var dyy = parseInt(map.style.top);
+	var w1 = getBoxWidth();
+	var h1 = getBoxHeight();
+	
+	var frame = document.getElementById('frame');
+	var buttons = document.getElementById('buttons');
+	frame.style.width = (window.innerWidth-250)*4/5  + "px";
+	frame.style.height = (window.innerHeight)*4/5  + "px";
+	frame.style.left = (window.innerWidth)/10  + "px";
+	frame.style.top = (window.innerHeight)/10  + "px";
+	buttons.style.right = (window.innerWidth)/20  + "px";
+	buttons.style.top = (window.innerHeight)/10  + "px";
+
+	map.style.left = dxx + (getBoxWidth()-w1)/2.0 + "px";
+	map.style.top = dyy + (getBoxHeight()-h1)/2.0 + "px" 	; 
+}
+
+var isDragging = false;
+var x1= 0;
+var xx1= 0;
+var yy1 = 0;
+var y1= 0;
+
+function handleMouseDown(evt) {
+	if (inBox(evt.clientX,evt.clientY)) {
+		x1 = evt.clientX - getBoxLeft();
+		xx1 = parseInt(document.getElementById('map').style.left);
+		y1 = evt.clientY - getBoxTop();
+		yy1 = parseInt(document.getElementById('map').style.top);
+		document.getElementById("frame").style.cursor = "move";
+		isDragging = true;
+		evt.preventDefault();
+	}
+}
+
+function handleMouseUp(evt) {
+	if (isDragging) {
+		document.getElementById("frame").style.cursor = "auto";
+		var map = document.getElementById("map");
+		map.style.left = xx1 + evt.clientX - getBoxLeft() - x1 + "px";
+		map.style.top = yy1 + evt.clientY - getBoxTop() - y1+ "px";
+		isDragging = false;
+	}
+}
+
+function handleMouseMove(evt) {
+	if (isDragging) {
+		var frame = document.getElementById('frame');
+		var map = document.getElementById("map");
+		map.style.left = xx1 + evt.clientX - getBoxLeft() - x1 + "px";
+		map.style.top = yy1 + evt.clientY - getBoxTop() - y1+ "px";
+		evt.preventDefault();
+	}
+}
+
+function handleDblClick(evt){
+	if (inBox(evt.clientX,evt.clientY)) {
+		var map = document.getElementById("map");
+		xx1 = parseInt(map.style.left);
+		yy1 = parseInt(map.style.top);
+		map.style.left = xx1 - (evt.clientX - (getBoxLeft() + getBoxWidth()/2)) + "px";
+		map.style.top = yy1 - (evt.clientY - (getBoxTop() + getBoxHeight()/2)) + "px";
+		evt.preventDefault();
+	}
+}
+
+function up(){
+	map.style.top = parseInt(document.getElementById('map').style.top) + (getBoxHeight()/2) + "px";
+}
+
+function down(){
+	map.style.top = parseInt(document.getElementById('map').style.top) - (getBoxHeight()/2) + "px";
+}
+
+function left() {
+	map.style.left = parseInt(document.getElementById('map').style.left) + (getBoxWidth()/2) + "px";
+}
+
+function right() {
+	map.style.left = parseInt(document.getElementById('map').style.left) - (getBoxWidth()/2) + "px";
+}
+
+function inn(){
+	if(ind!=0){
+		ind--;
+		var dx = getBoxWidth()/2 - parseInt(map.style.left);
+		dx = dx*(maps[ind].width/maps[ind+1].width);
+		var dy = getBoxHeight()/2 - parseInt(map.style.top);
+		dy = dy*(maps[ind].height/maps[ind+1].height);
+		document.getElementById('map').src = maps[ind].src;
+		map.style.left = getBoxWidth()/2 - dx + "px";
+		map.style.top = getBoxHeight()/2 - dy + "px";
+	}
+} 
+
+function out(){
+	if(ind!=3){
+		ind++;
+		var dx = getBoxWidth()/2 - parseInt(map.style.left);
+		dx = dx*(maps[ind].width/maps[ind-1].width);
+		var dy = getBoxHeight()/2 - parseInt(map.style.top);
+		dy = dy*(maps[ind].height/maps[ind-1].height);
+		document.getElementById('map').src = maps[ind].src;
+		map.style.left = getBoxWidth()/2 - dx + "px";
+		map.style.top = getBoxHeight()/2 - dy + "px";
+	}
+}
+
+document.getElementById("a").style.visibility = "hidden";
+document.getElementById("b").style.visibility = "hidden";
+document.getElementById("c").style.visibility = "hidden";
+document.getElementById("d").style.visibility = "hidden";
+
+document.addEventListener("mousemove",handleMouseMove,false);
+document.addEventListener("mousedown",handleMouseDown,false);
+document.addEventListener("mouseup",handleMouseUp,false);
+document.addEventListener("dblclick",handleDblClick,false);
+	
+window.addEventListener("resize",handleResize,false);
+
+document.getElementById('in').addEventListener("click",inn,false)
+document.getElementById('out').addEventListener("click",out,false)
+
+document.getElementById('up').addEventListener("click",up,false)
+document.getElementById('down').addEventListener("click",down,false)
+document.getElementById('left').addEventListener("click",left,false)
+document.getElementById('right').addEventListener("click",right,false)
+	
+</script>
+
+</body>
+</html>
